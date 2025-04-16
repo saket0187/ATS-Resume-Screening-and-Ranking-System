@@ -8,7 +8,7 @@ import plotly.express as px
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# --- Load Environment Variables (if any) ---
+# --- Load Environment Variables ---
 load_dotenv()
 
 # --- Load the Sentence Transformer Model ---
@@ -32,10 +32,13 @@ def extract_text_from_pdf(file):
 # --- Function to Compute ATS Scores using Sentence Embeddings ---
 def get_ats_scores(job_description, resumes):
     """
-    Computes semantic similarity between the job description and each resume.
-    The similarities are normalized to the range 0–100.
+    Computes the absolute semantic similarity between the job description and each resume,
+    and produces an ATS score by multiplying the cosine similarity by 100.
+
+    This score reflects the alignment of each resume with the job description without
+    scaling based on the min or max values among resumes.
     """
-    # Compute embeddings for the job description and all resumes
+    # Combine the job description and resumes into a single list for embedding
     texts = [job_description] + resumes
     embeddings = model.encode(texts)
 
@@ -46,15 +49,9 @@ def get_ats_scores(job_description, resumes):
     # Compute cosine similarities between job description and each resume
     cosine_scores = cosine_similarity([jd_embedding], resume_embeddings).flatten()
 
-    # Apply min–max normalization to scale values between 0 and 100
-    min_score = np.min(cosine_scores)
-    max_score = np.max(cosine_scores)
-    if max_score > min_score:
-        normalized_scores = (cosine_scores - min_score) / (max_score - min_score) * 100
-    else:
-        normalized_scores = np.zeros_like(cosine_scores)
-
-    return normalized_scores
+    # Multiply cosine similarity (0 to 1) by 100 to get an ATS score
+    ats_scores = cosine_scores * 100
+    return ats_scores
 
 # --- Streamlit Application ---
 st.title("AI Resume Screening & Candidate Ranking System")
@@ -77,7 +74,7 @@ if uploaded_files and job_description:
         resumes_text.append(text)
         resume_names.append(file.name)
     
-    # Calculate ATS scores using semantic embeddings
+    # Calculate ATS scores using semantic embeddings (absolute alignment score)
     ats_scores = get_ats_scores(job_description, resumes_text)
     
     # Create a DataFrame to display the results
@@ -103,3 +100,4 @@ if uploaded_files and job_description:
         file_name="resume_ranking_results.csv",
         mime="text/csv"
     )
+
