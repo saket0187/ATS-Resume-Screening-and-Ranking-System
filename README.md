@@ -17,10 +17,10 @@ This project is an AI-powered resume screening and candidate ranking system that
 ![Main Dashboard](133758.png)
 
 ### Job Description Input
-![Job Description Input](133858.png)
+![Job Description Input](135601.png)
 
 ### Resume Upload
-![Resume Upload](135601.png)
+![Resume Upload](133858.png)
 
 ### Resume Ranking Results
 ![Resume Ranking Results](135623.png)
