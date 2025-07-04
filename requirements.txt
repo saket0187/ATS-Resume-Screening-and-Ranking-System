@@ -5,3 +5,4 @@ scikit-learn
 plotly
 sentence-transformers
 python-dotenv
+nltk
